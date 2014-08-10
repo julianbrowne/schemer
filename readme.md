@@ -6,11 +6,11 @@ The master schema is then written to a docson directory and can be viewed in a b
 
 ## Installation
 
-    git clone repo
+    git clone https://github.com/julianbrowne/schemer.git
 
 ## Running
 
-    cd dir
+    cd schemer
 
     schemer example     # runs against the 'example' directory
 
