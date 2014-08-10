@@ -1,0 +1,14 @@
+{
+    "id" : 3,
+    "name" : "bob",
+    "email" : null,
+    "likes" : [ 
+        { "name" : "alice", "value" : "1" }
+    ],
+    "hates": { "objects": true },
+    "loathes": {
+        "embedded": {
+            "objects": false
+        }
+    }
+}

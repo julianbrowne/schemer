@@ -1,0 +1,6 @@
+www_root: "docson"
+debug: false
+fields_that_can_be_null:
+    - email
+    - metrics
+    - statuses

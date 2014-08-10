@@ -1,0 +1,9 @@
+{
+    "id" : 1,
+    "name" : "milton",
+    "age" : 42,
+    "likes" : [ 
+        { "name" : "cake", "value" : "8" },
+        { "name" : "staplers", "value" : "10" }
+    ]
+}

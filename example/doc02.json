@@ -1,0 +1,8 @@
+{
+    "id" : 1,
+    "name" : "alice",
+    "likes" : [ 
+        { "name" : "bob", "value" : "1" }
+    ],
+    "email": "alice@example.com"
+}

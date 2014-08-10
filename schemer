@@ -1,0 +1,86 @@
+#!/usr/bin/env ruby
+#
+#   Reads in multiple JSON documents and generates a
+#   master JSON schema to define them all.
+#
+#   Input is a directory continaing one or more JSON
+#   JSON docs (*.json). Each *.json file must
+#   contain one valid JSON document.
+#
+
+dir = File.dirname(__FILE__)
+
+$: << File.expand_path("#{dir}/lib")
+
+require "json"
+require 'yaml'
+require 'recursive_open_struct' # https://github.com/aetherknight/recursive-open-struct.git
+require "json-schema-generator" # https://github.com/maxlinc/json-schema-generator
+require "hashdiff"              # https://github.com/liufengyun/hashdiff
+require "json-schema"           # https://github.com/hoxworth/json-schema
+require "schema"
+require "util"
+
+config = YAML.load_file("config.yml")
+$debug = config['debug']
+directory = ARGV.first
+abort "no source directory provided\n#{Util.usage}" if !directory
+docs = Util.read_json_files(directory)
+
+master_schema = Schema.new
+
+Util.log "building master schema"
+
+docs.each_with_index do |doc, index|
+
+    doc_schema = JSON::SchemaGenerator.generate 'schemer', doc[:text], {:schema_version => 'draft3'}
+    differences = HashDiff.diff(JSON.parse(master_schema.to_json), JSON.parse(doc_schema))
+
+    differences.each do |action, key, value, new_value|
+        case action
+            when '+'
+                master_schema.insert(key, value)
+                Util.debug "#{doc[:filename]}: added new mandatory field '#{key}' to master with value #{value}"
+                if index != 0
+                    if master_schema.has_key? "#{key}.required"
+                        master_schema.insert("#{key}.required", false)
+                        Util.debug "#{doc[:filename]}: changed field '#{key}' to optional"
+                    end
+                end
+            when '-'
+                if master_schema.has_key? "#{key}.required"
+                    master_schema.insert("#{key}.required", false)
+                    Util.debug "#{doc[:filename]}: set field '#{key}' to optional"
+                end
+            when '~'
+                Util.debug "#{doc[:filename]}: no change required for '#{key}'"
+            else
+                abort "#{doc[:filename]}: action #{action} not understood"
+        end
+    end
+end
+
+config['fields_that_can_be_null'].each do |f|
+    cfg = master_schema.retrieve "properties.#{f}.type"
+    master_schema.insert("properties.#{f}.type", JSON.parse("[ \"null\", \"#{cfg}\" ]")) if cfg
+end
+
+puts "validating all docs against master schema"
+
+docs.each do |doc|
+    begin
+        passed = JSON::Validator.validate!(master_schema.to_json, JSON.parse(doc[:text], { :version => 'draft3' }))
+        abort "#{doc} failed schema test" if !passed
+    rescue JSON::Schema::ValidationError => e
+        doc_json = JSON.pretty_generate(JSON.parse(doc[:text]))
+        sch_json = JSON.pretty_generate(JSON.parse(master_schema.to_json))
+        abort "#{e}\n\n#{doc_json}\n\n#{sch_json}"
+    end
+    master_schema.extractor(JSON.parse(doc[:text]))
+end
+
+File.write("#{config['www_root']}/example.json", master_schema.to_json)
+
+Util.log "schema can be viewed using Docson in the browser at #{config['www_root']}/example.json"
+
+puts master_schema.values_for 'statuses.name'
