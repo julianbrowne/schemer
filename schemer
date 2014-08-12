@@ -33,6 +33,8 @@ Util.log "building master schema"
 
 docs.each_with_index do |doc, index|
 
+    master_schema.extractor(JSON.parse(doc[:text]))
+
     doc_schema = JSON::SchemaGenerator.generate 'schemer', doc[:text], {:schema_version => 'draft3'}
     differences = HashDiff.diff(JSON.parse(master_schema.to_json), JSON.parse(doc_schema))
 
@@ -65,7 +67,7 @@ config['fields_that_can_be_null'].each do |f|
     master_schema.insert("properties.#{f}.type", JSON.parse("[ \"null\", \"#{cfg}\" ]")) if cfg
 end
 
-puts "validating all docs against master schema"
+Util.log "validating all docs against master schema"
 
 docs.each do |doc|
     begin
@@ -76,11 +78,19 @@ docs.each do |doc|
         sch_json = JSON.pretty_generate(JSON.parse(master_schema.to_json))
         abort "#{e}\n\n#{doc_json}\n\n#{sch_json}"
     end
-    master_schema.extractor(JSON.parse(doc[:text]))
 end
 
 File.write("#{config['www_root']}/example.json", master_schema.to_json)
 
 Util.log "schema can be viewed using Docson in the browser at #{config['www_root']}/example.json"
 
-puts master_schema.values_for 'statuses.name'
+#puts master_schema.all_values.inspect
+
+f = File.new("#{config['www_root']}/doc.json","w")
+master_schema.all_keys.each do |key|
+    #puts key
+    master_schema.values_for(key).each do |value|
+        #puts value
+        f.puts "#{key}: #{value}"
+    end
+end
