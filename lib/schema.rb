@@ -1,5 +1,9 @@
 
+dir = File.dirname(__FILE__)
+$: << File.expand_path("#{dir}")
+
 require "json"
+require "util"
 
 class Schema
 
@@ -7,48 +11,27 @@ class Schema
         @schema=Hash.new { |h, k| h[k] = Hash.new(&h.default_proc) }
         @schema.merge! JSON.parse(h.to_json) # ensures consistent string keys
         @values = []
-    end
-
-    def extract_values(obj=@schema, parent=nil)
-        list = []
-        obj.each_with_index.find_all do |kv,i|
-            k,v=kv
-            if !v
-                v=k; k=i
-            end
-            leader = parent ? "#{parent}.#{k}" : "#{k}"
-            if v.class==Hash||v.class==Array
-                list << extract_values(v,leader)
-            else
-                if parent
-                    levels = parent.split('.')
-                    if levels.last.to_i.to_s == levels.last
-                        # array index so snip off end
-                        list << {"#{levels[0..-2].join}.#{k}" => v}
-                    else
-                        list << {"#{leader}" => v}
-                    end
-                else
-                    list << {"#{leader}" => v}
-                end
-            end
-        end
-        return list.flatten
+        @keys = []
     end
 
     def extractor(obj)
-        @values.concat extract_values(obj)
+        @keys.concat Util.json_keys(obj)
+        @values.concat Util.json_values(obj)
     end
 
-    def values_for(field)
+    def values_for(key)
         r = []
-        matches = @values.find_all { |v| v.has_key?(field) }
-        matches.each { |v| r << v[field] }
-        r.uniq.join(',')
+        matches = @values.find_all { |v| v.has_key?(key) }
+        matches.each { |v| r << v[key] }
+        r.uniq
+    end
+
+    def all_keys
+        @keys.uniq.sort
     end
 
     def all_values
-        @values
+        @values.uniq
     end
 
     def fetch_key(key, hsh=@schema)
