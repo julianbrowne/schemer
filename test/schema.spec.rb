@@ -116,21 +116,4 @@ class SchemaTest < Test::Unit::TestCase
 
     end
 
-    def test_extract_values
-
-        s = Schema.new
-        hash = { a: 1, b: 2, c: 3 }
-        r1 = s.extract_values(hash)
-        assert_equal(r1, [ {"a"=>1}, {"b"=>2}, {"c"=>3} ])
-
-        hash = { a: 1, b: [ {c:9} ], c: 3 }
-        r1 = s.extract_values(hash)
-        assert_equal(r1, [ {"a"=>1}, {"b.0.c"=>9}, {"c"=>3} ])
-
-        hash = { a: 1, b: { c: 3 }, c: 3 }
-        r1 = s.extract_values(hash)
-        assert_equal(r1, [ {"a"=>1}, {"b.c"=>3}, {"c"=>3} ])
-
-    end
-
 end
