@@ -92,7 +92,8 @@ function Viewer() {
     };
 
     this.get = function(url, callback) { 
-        new this.Request('get', url, callback).send();
+        cacheBuster = (Math.random()*1000000);
+        new this.Request('get', url + '?' + cacheBuster, callback).send();
     };
 
 };
