@@ -3,10 +3,21 @@
     cursor: pointer;
 }
 
-.primitive { 
+.primitive, .object { 
     font-size: 28px;
     line-height: 1.428;
     margin-top: -6px;
-    margin-bottom: 20px;
-    padding: 0;
+    margin-bottom: 10px;
+}
+
+.group {
+    margin-left: 30px;
+}
+
+.well {
+    margin-bottom: 5px;
+}
+
+#navigator {
+    margin-top: 30px;
 }

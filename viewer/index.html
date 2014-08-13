@@ -18,9 +18,6 @@
                 <button id="load" type="button" class="btn btn-primary">Load</button>
             </div>
             <div class="container">
-                <div id="log"></div>
-            </div>
-            <div class="container">
                 <div id="navigator"></div>
             </div>
         </div>
@@ -30,14 +27,9 @@
                 var v = new Viewer();
                 var url = 'doc.json';
 
-                function log(mesg) {
-                    $('#log').append('<p>' + mesg + '</p>');
-                }
-
                 $('#load').click(function() { 
                     $('#load').attr('disabled','disabled');
                     v.get(url, function(json) { 
-                        log('opening: ' + url);
                         var html = v.inspect(JSON.parse(json), true);
                         $('#navigator').html(html);
                         $('.object, .array').next().hide();

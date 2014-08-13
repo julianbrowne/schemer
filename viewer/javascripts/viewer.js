@@ -7,38 +7,18 @@ function Viewer() {
         var maxLevels = 10;
         if(maxLevels < 1) return 'Error: Object levels must be greater than 0';
         if(obj == null) return 'Error: Object was null';
-        str += '<ul>';
+        str += '<div class="group">';
         for(var field in obj) { 
             try { 
                 type =  this.getType(obj[field]);
                 if(((type == 'object')||(type == 'array')) && (obj[field] != null) && (level+1 < maxLevels)) { 
-                    str += '<div class="row ' + type + '">';
-                    str += '<div class="col-md-2">';
-                    str += '<h3><div class="label label-primary">&nbsp;'
-                    str += field;
-                    str += '&nbsp;<span class="badge">' + type + '</span>&nbsp;';
-                    str += '<span class="glyphicon glyphicon-hand-right"></span>';
-                    str += '</div></h3>';
-                    str += '</div>';
-                    str += '</div>';
+                    str += this.supplant(this.objectTemplate,{ type: type, field: field });
                     str += this.inspect(obj[field], maxLevels, level+1, html);
-
-                    //str += '<li class="' + type + '">' + field + '(' + type + ')</li>';                  
                 }
                 else { 
-                    str += '<div class="row ' + type + '">';
-                    str += '<div class="col-md-3">';
-                    str += '<div class="primitive">';
-                    str += '<div class="label label-info">&nbsp;';
-                    if(parseInt(field).toString() !== field.toString()) str += field
-                    str += '&nbsp;<span class="badge">' + type + '</span>&nbsp;';
-                    str += '</div>&nbsp;';
-                    str += '</div>';
-                    str += '</div>';
-                    str += '<div class="col-md-8">';
-                    str += '<div class="well well-sm">' + ((obj[field]==null)?(': <b>null</b>'):(obj[field])) + '</div>';
-                    str += '</div>';
-                    str += '</div>';
+                    var f = (parseInt(field).toString() === field.toString()) ? '' : field;
+                    var v = (obj[field]===null) ? 'null' : obj[field];
+                    str += this.supplant(this.primitiveTemplate,{type: type, field: f, value: v});
                 }
 
             }
@@ -46,7 +26,7 @@ function Viewer() {
                 str += '<li>Error: [' + field + '] : ' + err.toString() +'</li>';
             }
         }
-        str += '</ul>';
+        str += '</div>';
         if(!html) str = str.replace(/<.+?>/g,'');
         return str;
     };
@@ -64,6 +44,34 @@ function Viewer() {
         }
         return s;
     };
+
+    this.objectTemplate = '\
+        <div class="row {type}">\
+            <div class="col-md-2">\
+                <div class="object">\
+                    <div class="label label-primary">\
+                        {field}\
+                        <span class="badge">{type}</span>\
+                        <span class="glyphicon glyphicon-hand-right"></span>&nbsp;\
+                    </div>\
+                </div>\
+            </div>\
+        </div>';
+
+    this.primitiveTemplate = '\
+        <div class="row {type}">\
+            <div class="col-md-3">\
+                <div class="object">\
+                    <div class="label label-info">\
+                        {field}\
+                        <span class="badge">{type}</span>\
+                    </div>\
+                </div>\
+            </div>\
+            <div class="col-md-8">\
+                <div class="well well-sm">{value}</div>\
+            </div>\
+        </div>';
 
     this.Request = function(method, url, callback) { 
         var request = this;
@@ -89,6 +97,13 @@ function Viewer() {
             });
             request.xmlhttp.send();
         }
+    };
+
+    this.supplant = function (templ, obj) { 
+        return templ.replace(/{([^{}]*)}/g, function (a, b) { 
+            var r = obj[b];
+            return typeof r === 'string' || typeof r === 'number' ? r : a;
+        });
     };
 
     this.get = function(url, callback) { 
