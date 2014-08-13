@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="javascripts/viewer.js"></script>
+        <script src="javascripts/jquery-2.1.1.js"></script>
+        <script src="javascripts/bootstrap.min.js"></script>
+        <link href="stylesheets/bootstrap.min.css" rel="stylesheet">
+        <link href="stylesheets/style.css" rel="stylesheet">
+        <title>Schemer: Viewer</title>
+    </head>
+    <body role="document">
+        <div class="container">
+            <h1 class="page-header">Schemer</h1>
+            <div class="container">
+                <button id="load" type="button" class="btn btn-primary">Load</button>
+            </div>
+            <div class="container">
+                <div id="log"></div>
+            </div>
+            <div class="container">
+                <div id="navigator"></div>
+            </div>
+        </div>
+        <script>
+            $(function() { 
+
+                var v = new Viewer();
+                var url = 'doc.json';
+
+                function log(mesg) {
+                    $('#log').append('<p>' + mesg + '</p>');
+                }
+
+                $('#load').click(function() { 
+                    $('#load').attr('disabled','disabled');
+                    v.get(url, function(json) { 
+                        log('opening: ' + url);
+                        var html = v.inspect(JSON.parse(json), true);
+                        $('#navigator').html(html);
+                        $('.object, .array').next().hide();
+                        $('.object, .array').click(function(e) { $(this).next().toggle(); });
+                    });
+                });
+
+            })
+        </script>
+  </body>
+</html>

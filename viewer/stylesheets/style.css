@@ -1,0 +1,12 @@
+
+.object .label { 
+    cursor: pointer;
+}
+
+.primitive { 
+    font-size: 28px;
+    line-height: 1.428;
+    margin-top: -6px;
+    margin-bottom: 20px;
+    padding: 0;
+}
