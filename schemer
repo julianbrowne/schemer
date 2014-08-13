@@ -80,17 +80,4 @@ docs.each do |doc|
     end
 end
 
-File.write("#{config['www_root']}/example.json", master_schema.to_json)
-
-Util.log "schema can be viewed using Docson in the browser at #{config['www_root']}/example.json"
-
-#puts master_schema.all_values.inspect
-
-f = File.new("#{config['www_root']}/doc.json","w")
-master_schema.all_keys.each do |key|
-    #puts key
-    master_schema.values_for(key).each do |value|
-        #puts value
-        f.puts "#{key}: #{value}"
-    end
-end
+master_schema.summary_report("#{config['www_root']}/doc.json")

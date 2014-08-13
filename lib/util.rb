@@ -120,35 +120,6 @@ class Util
         return list.flatten.uniq
     end
 
-=begin
-    def self.json_values(obj, parent=nil)
-        list = []
-        obj.each_with_index.find_all do |kv,i|
-            k,v=kv
-            if !v
-                v=k; k=i
-            end
-            leader = parent ? "#{parent}.#{k}" : "#{k}"
-            if v.class==Hash||v.class==Array
-                list << json_values(v,leader)
-            else
-                if parent
-                    levels = parent.split('.')
-                    if levels.last.to_i.to_s == levels.last
-                        # array index so snip off end
-                        list << {"#{levels[0..-2].join}.#{k}" => v}
-                    else
-                        list << {"#{leader}" => v}
-                    end
-                else
-                    list << {"#{leader}" => v}
-                end
-            end
-        end
-        return list.flatten
-    end
-=end
-
     def self.usage
         "usage: schemer {json_source_directory}"
     end

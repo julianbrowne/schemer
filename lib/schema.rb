@@ -94,4 +94,21 @@ class Schema
         @schema.to_json
     end
 
+    def summary_report(filename)
+        opfile = File.new(filename,"w")
+        obj = {}
+        obj['schema'] = JSON.parse(@schema.to_json)
+        obj['values'] = {}
+        last = nil
+        all_keys.each do |key|
+            values_for(key).each do |value|
+                obj['values'][key] = [] if last.nil? || last != key
+                obj['values'][key] << value
+                last = key
+            end
+        end
+        opfile.puts "#{obj.to_json}"
+        Util.log "schema doc can be viewed using Docson in the browser at #{filename}"
+    end
+
 end

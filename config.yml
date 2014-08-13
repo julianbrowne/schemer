@@ -1,5 +1,7 @@
-www_root: "docson"
+www_root: "viewer"
+
 debug: false
+
 fields_that_can_be_null:
     - email
     - metrics
